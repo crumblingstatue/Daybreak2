@@ -1,6 +1,6 @@
 mod animation;
 mod graphics;
-mod testin;
+mod text;
 mod tiles;
 
 use animation::{draw_anim_sprite, AnimDesc, AnimState};
@@ -72,7 +72,7 @@ async fn main() {
     let font = load_ttf_font("./res/fonts/EightBitDragon-anqx.ttf")
         .await
         .unwrap();
-    let mut ta = testin::TextAnim::new(
+    let mut ta = text::TextAnim::new(
         "Once upon a time, there was a frog.\n\
                He was truly a majestic specimen.",
         font,
