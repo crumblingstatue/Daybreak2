@@ -1,5 +1,6 @@
 mod animation;
 mod graphics;
+mod testin;
 mod tiles;
 
 use animation::{draw_anim_sprite, AnimDesc, AnimState};
@@ -66,6 +67,16 @@ async fn main() {
             tilemap.tile_at_mut(x, y).lo = rand::gen_range(1u32, 32) as u16;
         }
     }
+
+    //Test
+    let font = load_ttf_font("./res/fonts/EightBitDragon-anqx.ttf")
+        .await
+        .unwrap();
+    let ta = testin::TextAnim {
+        text: "Once upon a time, I went down to the local grocery store.",
+        font: font,
+    };
+
     loop {
         let mut any_pressed = false;
         if is_key_down(KeyCode::Left) {
@@ -102,6 +113,10 @@ async fn main() {
             plr.pos.x - 24.,
             plr.pos.y - 24.,
         );
+
+        //Test text
+        ta.draw();
+
         next_frame().await
     }
 }
