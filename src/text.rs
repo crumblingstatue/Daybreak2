@@ -44,7 +44,6 @@ impl<'a> TextAnim<'a> {
             if i > self.line {
                 break;
             }
-            dbg!(line);
             let cursor = self.line_cursor.min(line.len());
             draw_text_ex(
                 if i < self.line { line } else { &line[..cursor] },
