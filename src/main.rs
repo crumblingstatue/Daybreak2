@@ -72,10 +72,11 @@ async fn main() {
     let font = load_ttf_font("./res/fonts/EightBitDragon-anqx.ttf")
         .await
         .unwrap();
-    let ta = testin::TextAnim {
-        text: "Once upon a time, I went down to the local grocery store.",
-        font: font,
-    };
+    let mut ta = testin::TextAnim::new(
+        "Once upon a time, there was a frog.\n\
+               He was truly a majestic specimen.",
+        font,
+    );
 
     loop {
         let mut any_pressed = false;
@@ -115,7 +116,7 @@ async fn main() {
         );
 
         //Test text
-        ta.draw();
+        ta.advance_and_draw(10);
 
         next_frame().await
     }
