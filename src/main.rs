@@ -42,7 +42,18 @@ fn select_frog_anim(dir: Dir, idle: bool) -> AnimDesc {
     }
 }
 
-#[macroquad::main("Daybreak 2")]
+fn window_config() -> Conf {
+    Conf {
+        window_title: "Daybreak 2".to_owned(),
+        fullscreen: false,
+        window_width: 800,
+        window_height: 600,
+        window_resizable: false,
+        ..Default::default()
+    }
+}
+
+#[macroquad::main(window_config)]
 async fn main() {
     let mut plr = Player::default();
     let spd = 5.0;
@@ -73,6 +84,9 @@ async fn main() {
         .await
         .unwrap();
     let mut ta = text::TextAnim::new(include_str!("../story.txt"), font);
+
+    //GONN BE LOADING TEXTURES HERE SO PROLLY DEWWY IS GONN MOVE IT SOMEWHERE BETTER
+    let d_box_line_tex = load_texture("./res/d_box_line.png").await.unwrap();
 
     loop {
         let mut any_pressed = false;
@@ -112,7 +126,7 @@ async fn main() {
         );
 
         //Test text
-        ta.advance_and_draw(32., 32., 90);
+        ta.advance_and_draw(32., 32., 10, d_box_line_tex);
 
         next_frame().await
     }
