@@ -93,7 +93,11 @@ async fn main() {
     loop {
         egui_macroquad::ui(|ctx| {
             egui::Window::new("Debug").show(ctx, |ui| {
-                ui.add(egui::TextEdit::multiline(&mut text_msg_buf).hint_text("Message"));
+                egui::ScrollArea::vertical()
+                    .max_height(200.0)
+                    .show(ui, |ui| {
+                        ui.add(egui::TextEdit::multiline(&mut text_msg_buf).hint_text("Message"));
+                    });
                 ui.horizontal(|ui| {
                     ui.label("Update delay");
                     ui.add(egui::DragValue::new(&mut ta.update_delay_ms).suffix("ms"));
