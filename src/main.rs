@@ -4,6 +4,7 @@ mod text;
 mod tiles;
 
 use animation::{draw_anim_sprite, AnimDesc, AnimState};
+use egui_macroquad::egui;
 use graphics::{SheetInfo, TileSheetInfo};
 use macroquad::prelude::*;
 use tiles::Tilemap;
@@ -83,12 +84,25 @@ async fn main() {
     let font = load_ttf_font("./res/fonts/EightBitDragon-anqx.ttf")
         .await
         .unwrap();
-    let mut ta = text::TextAnim::new(include_str!("../story.txt"), font);
 
     //GONN BE LOADING TEXTURES HERE SO PROLLY DEWWY IS GONN MOVE IT SOMEWHERE BETTER
     let d_box_line_tex = load_texture("./res/d_box_line.png").await.unwrap();
+    let mut text_msg_buf = String::new();
+    let mut ta = text::TextAnim::new(font);
 
     loop {
+        egui_macroquad::ui(|ctx| {
+            egui::Window::new("Debug").show(ctx, |ui| {
+                ui.add(egui::TextEdit::multiline(&mut text_msg_buf).hint_text("Message"));
+                ui.horizontal(|ui| {
+                    ui.label("Update delay");
+                    ui.add(egui::DragValue::new(&mut ta.update_delay_ms).suffix("ms"));
+                    if ui.button("Show text box").clicked() {
+                        ta.set_text(text_msg_buf.clone());
+                    }
+                });
+            });
+        });
         let mut any_pressed = false;
         if is_key_down(KeyCode::Left) {
             frog_dir = Dir::Left;
@@ -126,7 +140,8 @@ async fn main() {
         );
 
         //Test text
-        ta.advance_and_draw(32., 32., 10, d_box_line_tex);
+        ta.advance_and_draw(32., 32., d_box_line_tex);
+        egui_macroquad::draw();
 
         next_frame().await
     }

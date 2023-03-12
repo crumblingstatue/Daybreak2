@@ -4,28 +4,30 @@ use std::{
     time::{Duration, Instant},
 };
 
-pub struct TextAnim<'a> {
-    pub text: &'a str,
+pub struct TextAnim {
+    pub text: String,
     pub line: usize,
     pub cursor: usize,
     pub line_cursor: usize,
     pub font: Font,
     pub last_update: Instant,
+    pub update_delay_ms: u64,
 }
 
-impl<'a> TextAnim<'a> {
-    pub fn new(text: &'a str, font: Font) -> Self {
+impl TextAnim {
+    pub fn new(font: Font) -> Self {
         Self {
-            text,
+            text: String::new(),
             line: 0,
             cursor: 0,
             line_cursor: 0,
             font,
             last_update: Instant::now(),
+            update_delay_ms: 100,
         }
     }
     /// SPEED IS IN MILLISECONDS
-    pub fn advance_and_draw(&mut self, x: f32, y: f32, speed_ms: u32, d_box_line_tex: Texture2D) {
+    pub fn advance_and_draw(&mut self, x: f32, y: f32, d_box_line_tex: Texture2D) {
         // Draw rectangle box
         //let rect_color = Color::new(255., 153., 153., 255.); // LOL WUT WHY IT DRAWING WHITE INSTEAD OF PINKISH
         draw_rectangle(
@@ -87,7 +89,7 @@ impl<'a> TextAnim<'a> {
 
         let elapsed = self.last_update.elapsed();
         let mut should_update = false;
-        if elapsed >= Duration::from_millis(speed_ms.into()) {
+        if elapsed >= Duration::from_millis(self.update_delay_ms) {
             should_update = true;
             self.last_update = Instant::now();
         }
@@ -117,5 +119,15 @@ impl<'a> TextAnim<'a> {
                 },
             );
         }
+    }
+    pub fn set_text(&mut self, text: String) {
+        self.text = text;
+        self.reset_cursors();
+    }
+
+    fn reset_cursors(&mut self) {
+        self.cursor = 0;
+        self.line_cursor = 0;
+        self.line = 0;
     }
 }
