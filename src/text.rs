@@ -1,4 +1,3 @@
-use macroquad::miniquad::Texture;
 use macroquad::prelude::*;
 use std::{
     default::Default,
@@ -70,7 +69,7 @@ impl<'a> TextAnim<'a> {
             WHITE,
             DrawTextureParams {
                 dest_size: Option::from(Vec2 { x: 204., y: 12. }),
-                rotation: 1.5708,
+                rotation: std::f32::consts::FRAC_PI_2,
                 ..Default::default()
             },
         );
@@ -81,7 +80,7 @@ impl<'a> TextAnim<'a> {
             WHITE,
             DrawTextureParams {
                 dest_size: Option::from(Vec2 { x: 204., y: 12. }),
-                rotation: 1.5708,
+                rotation: std::f32::consts::FRAC_PI_2,
                 ..Default::default()
             },
         );
