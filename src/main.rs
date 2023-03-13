@@ -4,7 +4,7 @@ mod text;
 mod tiles;
 
 use animation::{draw_anim_sprite, AnimDesc, AnimState};
-use egui_macroquad::egui;
+use egui_macroquad::egui::{self};
 use gamedebug_core::{imm_dbg, Info};
 use graphics::{SheetInfo, TileSheetInfo};
 use macroquad::prelude::*;
@@ -94,7 +94,7 @@ async fn main() {
     let mut tilemap = Tilemap::new(50, 38);
     for y in 0..tilemap.height {
         for x in 0..tilemap.width {
-            tilemap.tile_at_mut(x, y).lo = rand::gen_range(1u32, 32) as u16;
+            tilemap.tile_at_mut(x, y).lo = 4;
         }
     }
     let mut ui_tab = UiTab::Textbox;
@@ -108,12 +108,16 @@ async fn main() {
     let d_box_line_tex = load_texture("./res/d_box_line.png").await.unwrap();
     let mut text_msg_buf = String::new();
     let mut ta = text::TextAnim::new(font);
+    let mut tile_to_draw = 0;
+    let mut upper_layer = false;
 
     loop {
         clear_background(BLACK);
         let mp = mouse_position();
         let (tx, ty) = ((mp.0 / 16.).floor(), (mp.1 / 16.).floor());
         imm_dbg!((tx, ty));
+        let mut egui_wants_ptr = false;
+        let mut egui_wants_kbd = false;
         egui_macroquad::ui(|ctx| {
             egui::Window::new("Daybreak 2").show(ctx, |ui| {
                 ui.horizontal(|ui| {
@@ -141,6 +145,27 @@ async fn main() {
                         });
                     }
                     UiTab::LevelEdit => {
+                        ui.horizontal(|ui| {
+                            ui.label("Tile to draw");
+                            ui.add(egui::DragValue::new(&mut tile_to_draw));
+                            let handle = egui::TextureId::User(
+                                tiles_texture.raw_miniquad_texture_handle().gl_internal_id() as _,
+                            );
+                            if tile_to_draw != 0 {
+                                let t = tile_to_draw - 1;
+                                let tx = t % 4;
+                                let ty = t / 4;
+                                let h_unit = 16. / tiles_texture.width();
+                                let v_unit = 16. / tiles_texture.height();
+                                ui.add(egui::Image::new(handle, egui::vec2(32.0, 32.0)).uv(
+                                    egui::Rect::from_min_size(
+                                        egui::pos2(tx as f32 * h_unit, ty as f32 * v_unit),
+                                        egui::vec2(h_unit, v_unit),
+                                    ),
+                                ));
+                            }
+                        });
+                        ui.checkbox(&mut upper_layer, "Upper layer");
                         if ui.button("Randomize tiles").clicked() {
                             for y in 0..tilemap.height {
                                 for x in 0..tilemap.width {
@@ -172,27 +197,40 @@ async fn main() {
                     }
                 }
             });
+            egui_wants_ptr = ctx.wants_pointer_input();
+            egui_wants_kbd = ctx.wants_keyboard_input();
         });
+        if is_mouse_button_down(MouseButton::Left) && !egui_wants_ptr {
+            let tile = tilemap.tile_at_mut(tx as usize, ty as usize);
+            let tref = if upper_layer {
+                &mut tile.hi
+            } else {
+                &mut tile.lo
+            };
+            *tref = tile_to_draw;
+        }
         let mut any_pressed = false;
-        if is_key_down(KeyCode::Left) {
-            frog_dir = Dir::Left;
-            plr.pos.x -= spd;
-            any_pressed = true;
-        }
-        if is_key_down(KeyCode::Right) {
-            frog_dir = Dir::Right;
-            plr.pos.x += spd;
-            any_pressed = true;
-        }
-        if is_key_down(KeyCode::Up) {
-            frog_dir = Dir::Up;
-            plr.pos.y -= spd;
-            any_pressed = true;
-        }
-        if is_key_down(KeyCode::Down) {
-            frog_dir = Dir::Down;
-            plr.pos.y += spd;
-            any_pressed = true;
+        if !egui_wants_kbd {
+            if is_key_down(KeyCode::Left) {
+                frog_dir = Dir::Left;
+                plr.pos.x -= spd;
+                any_pressed = true;
+            }
+            if is_key_down(KeyCode::Right) {
+                frog_dir = Dir::Right;
+                plr.pos.x += spd;
+                any_pressed = true;
+            }
+            if is_key_down(KeyCode::Up) {
+                frog_dir = Dir::Up;
+                plr.pos.y -= spd;
+                any_pressed = true;
+            }
+            if is_key_down(KeyCode::Down) {
+                frog_dir = Dir::Down;
+                plr.pos.y += spd;
+                any_pressed = true;
+            }
         }
         if frame_counter % 10 == 0 {
             frog_anim.advance();
