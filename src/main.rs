@@ -5,6 +5,7 @@ mod tiles;
 
 use animation::{draw_anim_sprite, AnimDesc, AnimState};
 use egui_macroquad::egui;
+use gamedebug_core::{imm_dbg, Info};
 use graphics::{SheetInfo, TileSheetInfo};
 use macroquad::prelude::*;
 use tiles::Tilemap;
@@ -58,6 +59,7 @@ fn window_config() -> Conf {
 enum UiTab {
     Textbox,
     LevelEdit,
+    DebugLog,
 }
 
 impl UiTab {
@@ -65,6 +67,7 @@ impl UiTab {
         match self {
             UiTab::Textbox => "Text box",
             UiTab::LevelEdit => "Level edit",
+            UiTab::DebugLog => "Debug log",
         }
     }
 }
@@ -107,11 +110,15 @@ async fn main() {
     let mut ta = text::TextAnim::new(font);
 
     loop {
+        let mp = mouse_position();
+        let (tx, ty) = ((mp.0 / 16.).floor(), (mp.1 / 16.).floor());
+        imm_dbg!((tx, ty));
         egui_macroquad::ui(|ctx| {
             egui::Window::new("Daybreak 2").show(ctx, |ui| {
                 ui.horizontal(|ui| {
                     ui.selectable_value(&mut ui_tab, UiTab::Textbox, UiTab::Textbox.label());
                     ui.selectable_value(&mut ui_tab, UiTab::LevelEdit, UiTab::LevelEdit.label());
+                    ui.selectable_value(&mut ui_tab, UiTab::DebugLog, UiTab::DebugLog.label());
                 });
                 ui.separator();
                 match ui_tab {
@@ -138,6 +145,27 @@ async fn main() {
                                 for x in 0..tilemap.width {
                                     tilemap.tile_at_mut(x, y).lo = rand::gen_range(1u32, 32) as u16;
                                 }
+                            }
+                        }
+                    }
+                    UiTab::DebugLog => {
+                        gamedebug_core::set_enabled(true);
+
+                        for info in gamedebug_core::IMMEDIATE.lock().unwrap().iter() {
+                            match info {
+                                Info::Msg(msg) => {
+                                    ui.label(msg);
+                                }
+                                Info::Rect(..) => todo!(),
+                            }
+                        }
+                        ui.separator();
+                        for entry in gamedebug_core::PERSISTENT.lock().unwrap().iter() {
+                            match &entry.info {
+                                Info::Msg(msg) => {
+                                    ui.label(format!("{}: {}", entry.frame, msg));
+                                }
+                                Info::Rect(..) => todo!(),
                             }
                         }
                     }
@@ -183,6 +211,8 @@ async fn main() {
         //Test text
         ta.advance_and_draw(32., 32., d_box_line_tex);
         egui_macroquad::draw();
+        gamedebug_core::clear_immediates();
+        gamedebug_core::inc_frame();
 
         next_frame().await
     }

@@ -7,4 +7,5 @@ edition = "2021"
 
 [dependencies]
 egui-macroquad = "0.15.0"
+gamedebug_core = { git = "https://github.com/crumblingstatue/gamedebug_core.git" }
 macroquad = "0.3.25"
