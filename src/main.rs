@@ -54,6 +54,21 @@ fn window_config() -> Conf {
     }
 }
 
+#[derive(PartialEq, Eq)]
+enum UiTab {
+    Textbox,
+    LevelEdit,
+}
+
+impl UiTab {
+    fn label(&self) -> &'static str {
+        match self {
+            UiTab::Textbox => "Text box",
+            UiTab::LevelEdit => "Level edit",
+        }
+    }
+}
+
 #[macroquad::main(window_config)]
 async fn main() {
     let mut plr = Player::default();
@@ -79,6 +94,7 @@ async fn main() {
             tilemap.tile_at_mut(x, y).lo = rand::gen_range(1u32, 32) as u16;
         }
     }
+    let mut ui_tab = UiTab::Textbox;
 
     //Test
     let font = load_ttf_font("./res/fonts/EightBitDragon-anqx.ttf")
@@ -92,19 +108,40 @@ async fn main() {
 
     loop {
         egui_macroquad::ui(|ctx| {
-            egui::Window::new("Debug").show(ctx, |ui| {
-                egui::ScrollArea::vertical()
-                    .max_height(200.0)
-                    .show(ui, |ui| {
-                        ui.add(egui::TextEdit::multiline(&mut text_msg_buf).hint_text("Message"));
-                    });
+            egui::Window::new("Daybreak 2").show(ctx, |ui| {
                 ui.horizontal(|ui| {
-                    ui.label("Update delay");
-                    ui.add(egui::DragValue::new(&mut ta.update_delay_ms).suffix("ms"));
-                    if ui.button("Show text box").clicked() {
-                        ta.set_text(text_msg_buf.clone());
-                    }
+                    ui.selectable_value(&mut ui_tab, UiTab::Textbox, UiTab::Textbox.label());
+                    ui.selectable_value(&mut ui_tab, UiTab::LevelEdit, UiTab::LevelEdit.label());
                 });
+                ui.separator();
+                match ui_tab {
+                    UiTab::Textbox => {
+                        egui::ScrollArea::vertical()
+                            .max_height(200.0)
+                            .show(ui, |ui| {
+                                ui.add(
+                                    egui::TextEdit::multiline(&mut text_msg_buf)
+                                        .hint_text("Message"),
+                                );
+                            });
+                        ui.horizontal(|ui| {
+                            ui.label("Update delay");
+                            ui.add(egui::DragValue::new(&mut ta.update_delay_ms).suffix("ms"));
+                            if ui.button("Show text box").clicked() {
+                                ta.set_text(text_msg_buf.clone());
+                            }
+                        });
+                    }
+                    UiTab::LevelEdit => {
+                        if ui.button("Randomize tiles").clicked() {
+                            for y in 0..tilemap.height {
+                                for x in 0..tilemap.width {
+                                    tilemap.tile_at_mut(x, y).lo = rand::gen_range(1u32, 32) as u16;
+                                }
+                            }
+                        }
+                    }
+                }
             });
         });
         let mut any_pressed = false;
