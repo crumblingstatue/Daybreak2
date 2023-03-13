@@ -100,12 +100,12 @@ async fn main() {
     let mut ui_tab = UiTab::Textbox;
 
     //Test
-    let font = load_ttf_font("./res/fonts/EightBitDragon-anqx.ttf")
-        .await
-        .unwrap();
+    let font =
+        load_ttf_font_from_bytes(include_bytes!("../res/fonts/EightBitDragon-anqx.ttf")).unwrap();
 
     //GONN BE LOADING TEXTURES HERE SO PROLLY DEWWY IS GONN MOVE IT SOMEWHERE BETTER
-    let d_box_line_tex = load_texture("./res/d_box_line.png").await.unwrap();
+    let d_box_line_tex =
+        Texture2D::from_file_with_format(include_bytes!("../res/d_box_line.png"), None);
     let mut text_msg_buf = String::new();
     let mut ta = text::TextAnim::new(font);
     let mut tile_to_draw = 0;
