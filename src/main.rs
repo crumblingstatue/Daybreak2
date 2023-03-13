@@ -138,7 +138,7 @@ async fn main() {
                             });
                         ui.horizontal(|ui| {
                             ui.label("Update delay");
-                            ui.add(egui::DragValue::new(&mut ta.update_delay_ms).suffix("ms"));
+                            ui.add(egui::DragValue::new(&mut ta.update_delay_secs).suffix("s"));
                             if ui.button("Show text box").clicked() {
                                 ta.set_text(text_msg_buf.clone());
                             }

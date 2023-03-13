@@ -1,8 +1,5 @@
 use macroquad::prelude::*;
-use std::{
-    default::Default,
-    time::{Duration, Instant},
-};
+use std::default::Default;
 
 pub struct TextAnim {
     pub text: String,
@@ -10,8 +7,8 @@ pub struct TextAnim {
     pub cursor: usize,
     pub line_cursor: usize,
     pub font: Font,
-    pub last_update: Instant,
-    pub update_delay_ms: u64,
+    pub last_update: f64,
+    pub update_delay_secs: f64,
 }
 
 impl TextAnim {
@@ -22,8 +19,8 @@ impl TextAnim {
             cursor: 0,
             line_cursor: 0,
             font,
-            last_update: Instant::now(),
-            update_delay_ms: 100,
+            last_update: macroquad::time::get_time(),
+            update_delay_secs: 0.1,
         }
     }
     /// SPEED IS IN MILLISECONDS
@@ -87,11 +84,11 @@ impl TextAnim {
             },
         );
 
-        let elapsed = self.last_update.elapsed();
+        let elapsed = macroquad::time::get_time() - self.last_update;
         let mut should_update = false;
-        if elapsed >= Duration::from_millis(self.update_delay_ms) {
+        if elapsed >= self.update_delay_secs {
             should_update = true;
-            self.last_update = Instant::now();
+            self.last_update = macroquad::time::get_time();
         }
         if should_update {
             self.cursor += 1;
