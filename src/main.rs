@@ -110,6 +110,7 @@ async fn main() {
     let mut ta = text::TextAnim::new(font);
 
     loop {
+        clear_background(BLACK);
         let mp = mouse_position();
         let (tx, ty) = ((mp.0 / 16.).floor(), (mp.1 / 16.).floor());
         imm_dbg!((tx, ty));
@@ -207,13 +208,14 @@ async fn main() {
             plr.pos.x - 24.,
             plr.pos.y - 24.,
         );
+        draw_rectangle_lines(tx * 16., ty * 16., 16., 16., 2., WHITE);
 
         //Test text
         ta.advance_and_draw(32., 32., d_box_line_tex);
-        egui_macroquad::draw();
         gamedebug_core::clear_immediates();
         gamedebug_core::inc_frame();
 
+        egui_macroquad::draw();
         next_frame().await
     }
 }
